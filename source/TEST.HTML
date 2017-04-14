@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>RMEGo.Form.Autosaver</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<style>
+    .box {
+        display: block;
+        width: 600px;
+        margin: 10px auto;
+        box-shadow: 0 0 10px #AAA;
+        padding: 1em;
+    }
+</style>
+
+<body>
+    <p class="msg"> </p>
+    <form class="box" id="autosave" style="font-family:consolas">
+        <p>Username &nbsp;&nbsp;&nbsp;<input type="text" name="username"></p>
+        <p>Password &nbsp;&nbsp;&nbsp;<input type="password" name="password"></p>
+        <input type="hidden" name="token" value="url">
+        <p>Upload File <input type="file" name="file"></p>
+        <p>Article &nbsp;&nbsp;&nbsp;&nbsp;<textarea rows="5" name="textarea"></textarea></p>
+        <p>Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" name="fruit" id="checkApple">Apple</label><label><input type="checkbox" name="fruit">Pineapple</label><label><input type="checkbox" name="fruit">Orange</label></p>
+        <p>Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" name="company">Microsoft</label><label><input type="checkbox" name="company">Google</label><label><input type="checkbox" name="company">Oracle</label></p>
+        <p>Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" name="isSingle" id="radioSingle">yes</label><label><input type="radio" name="isSingle">no</label></p>
+        <p>Choice&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" name="isCouple">yes</label><label><input type="radio" name="isCouple">no</label></p>
+        <p>How many times did you went to movie. <select name="How many times did you went to movie.">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select></p>
+        <p>color　<input type="color" name="color"></p>
+        <p>date　<input type="date" name="date"></p>
+        <p>datetime　<input type="datetime" name="datetime"></p>
+        <p>datetime-local　<input type="datetime-local" name="datetime-local"></p>
+        <p>email　<input type="email" name="email"></p>
+        <p>image　<input type="image" name="image"></p>
+        <p>month　<input type="month" name="month"></p>
+        <p>number　<input type="number" name="number"></p>
+        <p>range　<input type="range" name="range"></p>
+        <p>search　<input type="search" name="search"></p>
+        <p>tel　<input type="tel" name="tel"></p>
+        <p>time　<input type="time" name="time"></p>
+        <p>url　<input type="url" name="url"></p>
+        <p>week　<input type="week" name="week"></p>
+    </form>
+    <code id="value" class="box"><pre>object
+    <script src="Form.AutoSaver.js"></script>
+    <script>
+        String.prototype.replaceAll = function(a,b){
+            var self = this;
+            if(self.indexOf(a) === -1){
+                return self;
+            }
+            return self.replace(a,b).replaceAll(a,b);
+        };
+    var a = new RMEGo.Form.AutoSaver("autosave");
+    a.collect(); 
+    a.eventBinding({
+        prepare: function(){
+            document.getElementById("value").innerText = "Saving...";
+        },
+        finished: function(self){
+            document.getElementById("value").innerText = JSON.stringify(self.dataset).replaceAll("},{","},\r\n{");
+        },
+    });</script>
+</body>
+</html>
