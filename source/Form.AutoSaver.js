@@ -101,7 +101,6 @@ RMEGo.Form.AutoSaver.prototype.events = function(option) {
     };
     this.procedure.save = this.procedure.save || function(self) {
         // Default saving processing
-        self.collect();
         window.localStorage[self.settings.keyname] = JSON.stringify(self.dataset);
     };
     this.procedure.after_save = this.procedure.after_save || function(self) {
@@ -154,6 +153,7 @@ RMEGo.Form.AutoSaver.prototype.events = function(option) {
  */
 RMEGo.Form.AutoSaver.prototype.run = function() {
     var that = this;
+    self.collect();
     this.FieldElements.forEach(function(element) {
         element.addEventListener("change", that.savingTimeout);
         element.addEventListener("input", that.savingTimeout);
