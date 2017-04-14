@@ -28,12 +28,19 @@ RMEGo.Form.AutoSaver = function(ID) {
         clearTimeout(timeout);
         timeout = setTimeout(function() {
             self.procedure.prepare_save(self);
+            self.collect();
             self.procedure.save(self);
             self.procedure.after_save(self);
         }, self.settings.timeout);
     };
+    self.savingNoTimeout = function() {
+        self.procedure.prepare_save(self);
+        self.collect();
+        self.procedure.save(self);
+        self.procedure.after_save(self);
+    }
     self.events();
-    self.procedure.initial();
+    self.procedure.initial(self);
 };
 
 /**
@@ -80,8 +87,7 @@ RMEGo.Form.AutoSaver.prototype.collect = function() {
     if (this.settings.donot_savingempty) {
         var i = this.dataset.length || 0;
         while (i--) {
-            if (this.dataset[i].value == "") this.dataset.splice(i, 1);
-            if (this.dataset[i].indexes && this.dataset[i].indexes.length == 0) this.dataset.splice(i, 1);
+            if ((this.dataset[i].value == "") || (this.dataset[i].indexes && this.dataset[i].indexes.length == 0)) this.dataset.splice(i, 1);
         }
     }
     return this;
@@ -155,7 +161,7 @@ RMEGo.Form.AutoSaver.prototype.run = function() {
     var that = this;
     that.collect();
     this.FieldElements.forEach(function(element) {
-        element.addEventListener("change", that.savingTimeout);
+        element.addEventListener("change", that.savingNoTimeout);
         element.addEventListener("input", that.savingTimeout);
         element.addEventListener("propertychange", that.savingTimeout);
     });
@@ -169,7 +175,7 @@ RMEGo.Form.AutoSaver.prototype.die = function() {
     var that = this;
     clearTimeout(that.savingTimeout);
     this.FieldElements.forEach(function(element) {
-        element.removeEventListener("change", that.savingTimeout);
+        element.removeEventListener("change", that.savingNoTimeout);
         element.removeEventListener("input", that.savingTimeout);
         element.removeEventListener("propertychange", that.savingTimeout);
     });
