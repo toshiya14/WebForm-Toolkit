@@ -8,7 +8,7 @@ RMEGo.Form = RMEGo.Form || {};
  */
 RMEGo.Form.AutoSaver = function(ID) {
     var self = this;
-    self.dataset = {};
+    self.dataset = [];
     self.procedure = {};
     self.DOM = document.getElementById(ID);
     self.FieldElements = [];
@@ -33,7 +33,7 @@ RMEGo.Form.AutoSaver = function(ID) {
         }, self.settings.timeout);
     };
     self.events();
-
+    self.procedure.initial();
 };
 
 /**
@@ -93,11 +93,15 @@ RMEGo.Form.AutoSaver.prototype.collect = function() {
  */
 RMEGo.Form.AutoSaver.prototype.events = function(option) {
     this.procedure = option || {};
+    this.procedure.initial = this.procedure.initial || function(self) {
+        //Default processing when the object is constructed.
+    };
     this.procedure.prepare_save = this.procedure.prepare_save || function(self) {
         // Default preparing processing
     };
     this.procedure.save = this.procedure.save || function(self) {
         // Default saving processing
+        self.collect();
         window.localStorage[self.settings.keyname] = JSON.stringify(self.dataset);
     };
     this.procedure.after_save = this.procedure.after_save || function(self) {
@@ -150,7 +154,6 @@ RMEGo.Form.AutoSaver.prototype.events = function(option) {
  */
 RMEGo.Form.AutoSaver.prototype.run = function() {
     var that = this;
-    that.collect();
     this.FieldElements.forEach(function(element) {
         element.addEventListener("change", that.savingTimeout);
         element.addEventListener("input", that.savingTimeout);
