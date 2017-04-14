@@ -153,7 +153,7 @@ RMEGo.Form.AutoSaver.prototype.events = function(option) {
  */
 RMEGo.Form.AutoSaver.prototype.run = function() {
     var that = this;
-    self.collect();
+    that.collect();
     this.FieldElements.forEach(function(element) {
         element.addEventListener("change", that.savingTimeout);
         element.addEventListener("input", that.savingTimeout);
