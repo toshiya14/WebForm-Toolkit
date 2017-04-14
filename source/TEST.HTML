@@ -17,7 +17,6 @@
 </style>
 
 <body>
-    <p class="msg"> </p>
     <form class="box" id="autosave" style="font-family:consolas">
         <p>Username &nbsp;&nbsp;&nbsp;<input type="text" name="username"></p>
         <p>Password &nbsp;&nbsp;&nbsp;<input type="password" name="password"></p>
@@ -59,15 +58,21 @@
             }
             return self.replace(a,b).replaceAll(a,b);
         };
-    var a = new RMEGo.Form.AutoSaver("autosave");
-    a.collect(); 
-    a.eventBinding({
-        prepare: function(){
+    var a = new RMEGo.Form.AutoSaver("autosave").collect().events({
+        prepare_save: function(){
             document.getElementById("value").innerText = "Saving...";
         },
-        finished: function(self){
+        after_save: function(self){
             document.getElementById("value").innerText = JSON.stringify(self.dataset).replaceAll("},{","},\r\n{");
         },
-    });</script>
+        after_recover: function(self){
+            document.getElementById("value").innerText = "Recovering successfully.";
+        }
+    }).run();
+
+    document.addEventListener("DOMContentLoaded", function(){
+        a.recover();
+    });
+    </script>
 </body>
 </html>
