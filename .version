@@ -1,1 +1,14 @@
-0.0.0.1 Initialize responsitory
+> 0.0.0.1    2017/04/14    Initialize responsitory
+> 0.0.1.0    2017/04/14    Complete the basic functions
+    * constrctor (function) - RMEGo.Form.AutoSaver(Form ID)
+    * isDebug (function) - return a bool value whether is in debug mode now.
+    * collect (function) - start to collect the form and save the input data.
+    * events (function) - use custom functions instead of the default procedure functions.
+    * run (function) - start running the autosaver.
+    * die (function) - kill the running autosaver.
+    * recover (function) - recover the saved data to the form.
+    * dataset (array) - the element in it is a object with the structure of {name, type, value/indexes}, each obejct represent a user input.
+    * procedure (object) - a key-value object that config the procedures would be used during the AutoSaver running.
+    * DOM (HTMLElement) - the HTMLElement pointed to the form.
+    * FieldElements (array) - this is a array of HTMLElement. each HTMLElement is pointed to a control in the form.
+    * settings (object) - this is a key-value object that config the AutoSaver Instance and tell the AutoSaver how to work.
