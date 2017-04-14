@@ -1,16 +1,15 @@
 var RMEGo = RMEGo || {};
 RMEGo.Form = RMEGo.Form || {};
 
-/**
+/** 
  * Represents a AutoSaver module to gather the input data from the given DOM object and recover back.
- * 
  * @constructor
  * @param {string} ID - A ID which is indicated a form tag and contains form controls.
  */
 RMEGo.Form.AutoSaver = function(ID) {
     var self = this;
-    self.savingTimeout = {};
     self.dataset = {};
+    self.procedure = {};
     self.DOM = document.getElementById(ID);
     self.FieldElements = [];
     self.settings = {
@@ -19,10 +18,22 @@ RMEGo.Form.AutoSaver = function(ID) {
         "keyname": "formdata", // localstorage key.
         "ignore": {
             "name": [""],
-            "type": ["password", "submit", "button", "image"]
+            "type": ["password", "submit", "button", "image"] // file would be always skipped even if it is not set in this array.
         }, // filter.
+        "donot_savingempty": true,
     };
-    self.eventBinding();
+
+    var timeout = {};
+    self.savingTimeout = function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+            self.procedure.prepare_save(self);
+            self.procedure.save(self);
+            self.procedure.after_save(self);
+        }, self.settings.timeout);
+    };
+    self.events();
+
 };
 
 /**
@@ -34,7 +45,6 @@ RMEGo.Form.AutoSaver.prototype.isDebug = function() {
 
 /**
  * Collect the input data from form.
- * 
  */
 RMEGo.Form.AutoSaver.prototype.collect = function() {
     var self = this;
@@ -47,70 +57,135 @@ RMEGo.Form.AutoSaver.prototype.collect = function() {
     this.FieldElements.forEach(function(element) {
         if (element.name.isIn(self.settings.ignore.name) || element.type.isIn(self.settings.ignore.type)) return;
         switch (element.type) {
-            default: self.dataset.push({ "name": element.name, "type": element.type, "value": element.value });
-            break;
-
+            case "file":
+                break;
             case "radio":
-                    case "checkbox":
-                    var name = element.name;
+            case "checkbox":
+                var name = element.name;
                 if (!indexes[name]) {
                     var index = [];
-                    var list = self.DOM.querySelectorAll("*[name=" + name + "]");
+                    var list = self.DOM.querySelectorAll("*[name='" + name + "']");
                     list.forEach(function(element, i) { if (element.checked) index.push(i) });
                     indexes[name] = { name: name, type: element.type, indexes: index };
                 }
+                break;
+            default:
+                self.dataset.push({ "name": element.name, "type": element.type, "value": element.value });
                 break;
         }
     });
     for (var key in indexes) {
         this.dataset.push(indexes[key]);
     }
-    return JSON.stringify(this.dataset);
+    if (this.settings.donot_savingempty) {
+        var i = this.dataset.length || 0;
+        while (i--) {
+            if (this.dataset[i].value == "") this.dataset.splice(i, 1);
+            if (this.dataset[i].indexes && this.dataset[i].indexes.length == 0) this.dataset.splice(i, 1);
+        }
+    }
+    return this;
 };
 
 /**
- * Binding event with custom functions.
- * 
- * @param {object} option - this object contains 3 optional function.
- *     `prepare` is used for the processing before the data saving.
- *     `saving` is used for the processing during the data saving.
- *     `finished` is used for the processing after the data saving.
+ * Binding events with custom functions.
+ * @param {object} option - this object contains some optional function so that you could custom the procedures.
  */
-RMEGo.Form.AutoSaver.prototype.eventBinding = function(option) {
-    var procedure = option || {};
-    procedure.prepare = procedure.prepare || RMEGo.Form.AutoSaver.DefaultPrepareProcedure;
-    procedure.saving = procedure.saving || RMEGo.Form.AutoSaver.DefaultSavingProcedure;
-    procedure.finished = procedure.finished || RMEGo.Form.AutoSaver.DefaultFinishedProcedure;
+RMEGo.Form.AutoSaver.prototype.events = function(option) {
+    this.procedure = option || {};
+    this.procedure.prepare_save = this.procedure.prepare_save || function(self) {
+        // Default preparing processing
+    };
+    this.procedure.save = this.procedure.save || function(self) {
+        // Default saving processing
+        self.collect();
+        window.localStorage[self.settings.keyname] = JSON.stringify(self.dataset);
+    };
+    this.procedure.after_save = this.procedure.after_save || function(self) {
+        // Default finished processing
+    };
+    this.procedure.prepare_recover = this.procedure.prepare_recover || function(self) {
+        // Default process before recovering
+    }
+    this.procedure.recover = this.procedure.recover || function(self) {
+        // Default recovering process
+        var datasource = window.localStorage[self.settings.keyname];
+        var dataset = [];
+        if (datasource) {
+            try {
+                dataset = JSON.parse(datasource);
+            } catch (exc) {
+                window.localStorage.removeItem(self.settins.keyname);
+            }
+        }
+        if (dataset && dataset.length > 0) {
+            dataset.forEach(function(element) {
+                switch (element.type) {
+                    case "file":
+                        break;
+                    case "radio":
+                    case "checkbox":
+                        var controls = self.DOM.querySelectorAll("[name='" + element.name + "']");
+                        controls.forEach(function(ctrl) { ctrl.checked = false; })
+                        element.indexes.forEach(function(index) {
+                            controls[index].checked = true;
+                        });
+                        break;
+                    default:
+                        self.DOM.querySelector("[name='" + element.name + "']").value = element.value;
+                        break;
+                }
+            });
+        }
+    }
+    this.procedure.after_recover = this.procedure.after_recover || function() {
+        // Default process after recovered.
+    }
     var timeout = this.settings.timeout;
     var that = this;
-    this.FieldElements.forEach(function(element) {
-        var eventHandler = function() {
-            clearTimeout(that.savingTimeout);
-            that.savingTimeout = setTimeout(function() {
-                procedure.prepare(that);
-                procedure.saving(that);
-                procedure.finished(that);
-            }, timeout);
-        }
-        element.addEventListener("change", eventHandler);
-        element.addEventListener("input", eventHandler);
-        element.addEventListener("propertychange", eventHandler);
-    })
+    return this;
 }
 
-RMEGo.Form.AutoSaver.DefaultPrepareProcedure = function(self) {
+/**
+ * Start runing the AutoSaver.
+ */
+RMEGo.Form.AutoSaver.prototype.run = function() {
+    var that = this;
+    this.FieldElements.forEach(function(element) {
+        element.addEventListener("change", that.savingTimeout);
+        element.addEventListener("input", that.savingTimeout);
+        element.addEventListener("propertychange", that.savingTimeout);
+    });
+    return this;
+}
 
-};
+/**
+ * Stop runing the AutoSaver.
+ */
+RMEGo.Form.AutoSaver.prototype.die = function() {
+    var that = this;
+    clearTimeout(that.savingTimeout);
+    this.FieldElements.forEach(function(element) {
+        element.removeEventListener("change", that.savingTimeout);
+        element.removeEventListener("input", that.savingTimeout);
+        element.removeEventListener("propertychange", that.savingTimeout);
+    });
+    return this;
+}
 
-RMEGo.Form.AutoSaver.DefaultSavingProcedure = function(self) {
-    self.collect();
-    window.localStorage[self.settings.keyname] = JSON.stringify(self.dataset);
-};
+/**
+ * Processing recover procedure.
+ */
+RMEGo.Form.AutoSaver.prototype.recover = function() {
+    this.procedure.prepare_recover(this);
+    this.procedure.recover(this);
+    this.procedure.after_recover(this);
+    return this;
+}
 
-RMEGo.Form.AutoSaver.DefaultFinishedProcedure = function(self) {
-    console.log(self.dataset);
-};
-
+/**
+ * Extend string.isIn(array) to check if the string is in the array.
+ */
 String.prototype.isIn = function(array) {
     var self = this.toString();
     for (var i in array) {
