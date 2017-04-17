@@ -48,6 +48,9 @@
         <p>url　<input type="url" name="url"></p>
         <p>week　<input type="week" name="week"></p>
     </form>
+    <div class="box">
+        <p>Status: <span id="status"></span></p>
+    </div>
     <code id="value" class="box"><pre>object
     <script src="Form.AutoSaver.js"></script>
     <script>
@@ -72,6 +75,9 @@
 
     document.addEventListener("DOMContentLoaded", function(){
         a.recover();
+        if(a.detect()){
+            document.getElementById("status").innerHTML = "Detected a recoverable data.";
+        }
     });
     </script>
 </body>

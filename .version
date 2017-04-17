@@ -1,4 +1,5 @@
 > 0.0.0.1    2017/04/14    Initialize responsitory
+
 > 0.0.1.0    2017/04/14    Complete the basic functions
     * constrctor (function) - RMEGo.Form.AutoSaver(Form ID)
     * isDebug (function) - return a bool value whether is in debug mode now.
@@ -12,3 +13,14 @@
     * DOM (HTMLElement) - the HTMLElement pointed to the form.
     * FieldElements (array) - this is a array of HTMLElement. each HTMLElement is pointed to a control in the form.
     * settings (object) - this is a key-value object that config the AutoSaver Instance and tell the AutoSaver how to work.
+
+> 0.0.1.1    2017/04/14    Add event initial to AutoSaver procedure
+
+> 0.0.1.2    2017/04/14    Add savingNoTimeout to handle change event
+    It would save immediatelly when the control lost focus (as the control changed the attribute `value` and then triggered `change` event).
+    Bug fix: 
+        * When check the dataset[i].indexes, Error happens and says dataset[i] is not defined. (The reason is that the dataset[i] have been deleted, and the `dataset[i]` there is indeed `dataset[i+1]`)
+        * When saving the data, it does not collect the form. Do not have any calling of the collect function there.
+
+> 0.0.2.0    2017/04/17    Add Detect procedure and detect function to AutoSaver
+

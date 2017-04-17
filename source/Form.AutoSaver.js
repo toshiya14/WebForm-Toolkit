@@ -99,6 +99,13 @@ RMEGo.Form.AutoSaver.prototype.collect = function() {
  */
 RMEGo.Form.AutoSaver.prototype.events = function(option) {
     this.procedure = option || {};
+    this.procedure.detect = this.procedure.detect || function(self) {
+        if (window.localStorage[self.settings.keyname]) {
+            return true;
+        } else {
+            return false;
+        }
+    };
     this.procedure.initial = this.procedure.initial || function(self) {
         //Default processing when the object is constructed.
     };
@@ -114,7 +121,7 @@ RMEGo.Form.AutoSaver.prototype.events = function(option) {
     };
     this.procedure.prepare_recover = this.procedure.prepare_recover || function(self) {
         // Default process before recovering
-    }
+    };
     this.procedure.recover = this.procedure.recover || function(self) {
         // Default recovering process
         var datasource = window.localStorage[self.settings.keyname];
@@ -180,7 +187,7 @@ RMEGo.Form.AutoSaver.prototype.die = function() {
         element.removeEventListener("propertychange", that.savingTimeout);
     });
     return this;
-}
+};
 
 /**
  * Processing recover procedure.
@@ -190,8 +197,14 @@ RMEGo.Form.AutoSaver.prototype.recover = function() {
     this.procedure.recover(this);
     this.procedure.after_recover(this);
     return this;
-}
+};
 
+/**
+ * Detecting recoverable data, if exists return true.
+ */
+RMEGo.Form.AutoSaver.prototype.detect = function() {
+    return this.procedure.detect(this);
+};
 /**
  * Extend string.isIn(array) to check if the string is in the array.
  */
