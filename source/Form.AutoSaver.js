@@ -17,7 +17,7 @@ RMEGo.Form.AutoSaver = function(ID) {
         "timeout": 1000, // saving timeout.
         "keyname": "formdata", // localstorage key.
         "ignore": {
-            "name": [""],
+            "name": [],
             "type": ["password", "submit", "button", "image"] // file would be always skipped even if it is not set in this array.
         }, // filter.
         "donot_savingempty": true,
