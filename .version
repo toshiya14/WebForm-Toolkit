@@ -22,5 +22,5 @@
         * When check the dataset[i].indexes, Error happens and says dataset[i] is not defined. (The reason is that the dataset[i] have been deleted, and the `dataset[i]` there is indeed `dataset[i+1]`)
         * When saving the data, it does not collect the form. Do not have any calling of the collect function there.
 
-> 0.0.2.0    2017/04/17    Add Detect procedure and detect function to AutoSaver
+> 0.0.2.2    2017/04/17    Add Detect procedure and detect function to AutoSaver
 
